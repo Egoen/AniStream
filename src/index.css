@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap');
+
+@layer base {
+  :root {
+    --background: 220 14% 7%;
+    --foreground: 210 40% 98%;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #0b0e11;
+    color: #f8f9fe;
+    font-family: "Inter", system-ui, sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #161a1e;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #ff8c94;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #ff7481;
+  }
+}
+
+@layer components {
+  .shimmer-bg {
+    background: linear-gradient(90deg, #1c2024 25%, #22262b 50%, #1c2024 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .glass-card {
+    background: rgba(34, 38, 43, 0.6);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 140, 148, 0.15);
+  }
+
+  .glass-panel {
+    background: rgba(34, 38, 43, 0.6);
+    backdrop-filter: blur(24px);
+  }
+
+  .brand-glow {
+    box-shadow: 0 0 20px rgba(255, 140, 148, 0.3);
+  }
+
+  .anime-card-hover {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .anime-card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(255, 140, 148, 0.2);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #ff8c94, #fc81aa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .font-headline {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
+  .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .line-clamp-3 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+}
