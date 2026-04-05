@@ -333,13 +333,13 @@ export default function FavoritesPage() {
               </p>
             </div>
 
-            {/* Quick Links */}
+            {/* Legal */}
             <div>
-              <h4 className="text-[#ff8c94] font-bold text-xs tracking-widest mb-4 uppercase">Quick Links</h4>
+              <h4 className="text-[#ff8c94] font-bold text-xs tracking-widest mb-4 uppercase">Legal</h4>
               <ul className="space-y-3">
-                {["Privacy Policy", "Terms of Service", "About Us"].map((label) => (
+                {([["Privacy Policy", "/privacy"], ["Terms of Service", "/terms"], ["About Us", "/about"]] as [string, string][]).map(([label, href]) => (
                   <li key={label}>
-                    <span className="text-[#a9abaf] hover:text-[#f8f9fe] text-sm transition-colors cursor-pointer">{label}</span>
+                    <Link to={href} className="text-[#a9abaf] hover:text-[#f8f9fe] text-sm transition-colors">{label}</Link>
                   </li>
                 ))}
               </ul>

@@ -15,6 +15,9 @@ import HistoryPage from "@/pages/HistoryPage";
 import AllAnimePage from "@/pages/AllAnimePage";
 import BatchPage from "@/pages/BatchPage";
 import NotFoundPage from "@/pages/NotFoundPage";
+import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
+import TermsOfServicePage from "@/pages/TermsOfServicePage";
+import AboutPage from "@/pages/AboutPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,6 +49,9 @@ export default function App() {
             <Route path="/all-anime" element={<AllAnimePage />} />
             <Route path="/batch" element={<BatchPage />} />
             <Route path="/batch/:slug" element={<BatchPage />} />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsOfServicePage />} />
+            <Route path="/about" element={<AboutPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
