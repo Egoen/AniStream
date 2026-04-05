@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Play, Trash2, ChevronDown, SortAsc } from "lucide-react";
+import { Heart, Play, Trash2, ChevronDown, SortAsc, Search, X } from "lucide-react";
 import { useAppStore } from "@/stores/appStore";
 import type { FavoriteItem } from "@/types/anime";
 
@@ -78,7 +78,7 @@ function FavoriteCard({ item, onRemove }: { item: FavoriteItem; onRemove: (slug:
   );
 }
 
-// ── Empty State ───────────────────────────────────────────────────────────────
+// ── Empty State (no favorites at all) ─────────────────────────────────────────
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-28 px-6">
@@ -126,6 +126,33 @@ function EmptyState() {
   );
 }
 
+// ── Filter Empty State (has favorites, but none match query) ──────────────────
+function FilterEmptyState({ query, onClear }: { query: string; onClear: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-24 px-6">
+      <div
+        className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
+        style={{ background: "rgba(255,140,148,0.08)", border: "1px solid rgba(255,140,148,0.15)" }}
+      >
+        <Search size={28} className="text-[#ff8c94]/40" />
+      </div>
+      <span className="text-[#ff8c94] font-bold tracking-widest text-xs mb-2 font-headline uppercase">No Match</span>
+      <p className="text-[#f8f9fe] font-bold text-lg mb-2 text-center">
+        No favorites match <span className="text-[#ff8c94]">"{query}"</span>
+      </p>
+      <p className="text-[#a9abaf] text-sm text-center max-w-xs leading-relaxed mb-6">
+        Try a different keyword or clear the filter to see all your saved anime.
+      </p>
+      <button
+        onClick={onClear}
+        className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#22262b] text-sm font-bold text-[#a9abaf] hover:text-[#ff8c94] hover:border-[#ff8c94]/30 transition-all"
+      >
+        <X size={13} /> Clear Filter
+      </button>
+    </div>
+  );
+}
+
 // ── Sort Dropdown ─────────────────────────────────────────────────────────────
 function SortButton({ mode, onChange }: { mode: SortMode; onChange: (m: SortMode) => void }) {
   const labels: Record<SortMode, string> = {
@@ -167,6 +194,7 @@ function SortButton({ mode, onChange }: { mode: SortMode; onChange: (m: SortMode
 export default function FavoritesPage() {
   const { favorites, removeFavorite } = useAppStore();
   const [sortMode, setSortMode] = useState<SortMode>("newest");
+  const [filterQuery, setFilterQuery] = useState("");
 
   const sorted = useMemo(() => {
     const copy = [...favorites];
@@ -175,6 +203,14 @@ export default function FavoritesPage() {
     if (sortMode === "title") return copy.sort((a, b) => a.title.localeCompare(b.title));
     return copy;
   }, [favorites, sortMode]);
+
+  const filtered = useMemo(() => {
+    const q = filterQuery.trim().toLowerCase();
+    if (!q) return sorted;
+    return sorted.filter((item) => item.title.toLowerCase().includes(q));
+  }, [sorted, filterQuery]);
+
+  const isFiltering = filterQuery.trim().length > 0;
 
   return (
     <div className="bg-[#0b0e11] min-h-screen">
@@ -199,37 +235,88 @@ export default function FavoritesPage() {
             </div>
           </div>
 
-          {/* Sort control */}
-          {favorites.length > 1 && (
-            <SortButton mode={sortMode} onChange={setSortMode} />
+          {/* Controls: filter + sort */}
+          {favorites.length > 0 && (
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Live filter input */}
+              <div
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#22262b] focus-within:border-[#ff8c94]/40 transition-all min-h-[44px]"
+                style={{ background: "rgba(16,20,23,0.8)" }}
+              >
+                <Search size={13} className="text-[#a9abaf] shrink-0" />
+                <input
+                  value={filterQuery}
+                  onChange={(e) => setFilterQuery(e.target.value)}
+                  placeholder="Filter by title..."
+                  className="bg-transparent text-sm text-[#f8f9fe] placeholder-[#737679] outline-none w-36"
+                />
+                {filterQuery && (
+                  <button
+                    onClick={() => setFilterQuery("")}
+                    className="text-[#737679] hover:text-[#f8f9fe] transition-colors"
+                    aria-label="Clear filter"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+              </div>
+
+              {/* Sort — only show when not filtering and there are multiple items */}
+              {favorites.length > 1 && (
+                <SortButton mode={sortMode} onChange={setSortMode} />
+              )}
+            </div>
           )}
         </div>
 
-        {/* ── Empty State ──────────────────────────────────────────────── */}
+        {/* ── Empty State (no favorites) ───────────────────────────────── */}
         {favorites.length === 0 && <EmptyState />}
 
+        {/* ── Filter Empty State ───────────────────────────────────────── */}
+        {favorites.length > 0 && isFiltering && filtered.length === 0 && (
+          <FilterEmptyState query={filterQuery} onClear={() => setFilterQuery("")} />
+        )}
+
         {/* ── Grid ────────────────────────────────────────────────────── */}
-        {favorites.length > 0 && (
+        {favorites.length > 0 && filtered.length > 0 && (
           <>
+            {/* Result count when actively filtering */}
+            {isFiltering && (
+              <div className="flex items-center gap-3 mb-6">
+                <p className="text-xs text-[#737679] font-bold">
+                  <span className="text-[#ff8c94]">{filtered.length}</span> result{filtered.length !== 1 ? "s" : ""} for
+                  {" "}<span className="text-[#a9abaf]">"{filterQuery}"</span>
+                </p>
+                <button
+                  onClick={() => setFilterQuery("")}
+                  className="flex items-center gap-1 text-xs text-[#737679] hover:text-[#ff8c94] transition-colors font-bold"
+                >
+                  <X size={10} /> Clear
+                </button>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-6 gap-y-10">
-              {sorted.map((item) => (
+              {filtered.map((item) => (
                 <FavoriteCard key={item.slug} item={item} onRemove={removeFavorite} />
               ))}
             </div>
 
             {/* Clear all */}
-            <div className="flex justify-center mt-16">
-              <button
-                onClick={() => {
-                  if (window.confirm(`Remove all ${favorites.length} favorites?`)) {
-                    favorites.forEach((f) => removeFavorite(f.slug));
-                  }
-                }}
-                className="flex items-center gap-2 px-6 py-3 rounded-xl border border-[#22262b] text-sm font-bold text-[#737679] hover:text-rose-400 hover:border-rose-500/30 hover:bg-rose-500/5 transition-all"
-              >
-                <Trash2 size={14} /> Clear All Favorites
-              </button>
-            </div>
+            {!isFiltering && (
+              <div className="flex justify-center mt-16">
+                <button
+                  onClick={() => {
+                    if (window.confirm(`Remove all ${favorites.length} favorites?`)) {
+                      favorites.forEach((f) => removeFavorite(f.slug));
+                    }
+                  }}
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl border border-[#22262b] text-sm font-bold text-[#737679] hover:text-rose-400 hover:border-rose-500/30 hover:bg-rose-500/5 transition-all"
+                >
+                  <Trash2 size={14} /> Clear All Favorites
+                </button>
+              </div>
+            )}
           </>
         )}
 
