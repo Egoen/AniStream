@@ -18,6 +18,9 @@ import NotFoundPage from "@/pages/NotFoundPage";
 import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
 import TermsOfServicePage from "@/pages/TermsOfServicePage";
 import AboutPage from "@/pages/AboutPage";
+import FAQPage from "@/pages/FAQPage";
+import AppStatusPage from "@/pages/AppStatusPage";
+import FeatureRequestPage from "@/pages/FeatureRequestPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,6 +55,9 @@ export default function App() {
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="/terms" element={<TermsOfServicePage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/faq" element={<FAQPage />} />
+            <Route path="/app-status" element={<AppStatusPage />} />
+            <Route path="/feature-request" element={<FeatureRequestPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>

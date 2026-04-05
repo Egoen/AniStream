@@ -453,9 +453,10 @@ export default function HomePage() {
             <div>
               <h4 className="text-[#ff8c94] font-bold text-sm mb-4">Support</h4>
               <ul className="space-y-2.5">
-                {["Contact Support", "FAQ", "App Status", "Feature Request"].map((label) => (
-                  <li key={label}><span className="text-[#a9abaf] text-sm">{label}</span></li>
-                ))}
+                <li><a href="mailto:lastanteiku@gmail.com" className="text-[#a9abaf] hover:text-[#f8f9fe] text-sm transition-colors">Contact Support</a></li>
+                <li><Link to="/faq" className="text-[#a9abaf] hover:text-[#f8f9fe] text-sm transition-colors">FAQ</Link></li>
+                <li><Link to="/app-status" className="text-[#a9abaf] hover:text-[#f8f9fe] text-sm transition-colors">App Status</Link></li>
+                <li><Link to="/feature-request" className="text-[#a9abaf] hover:text-[#f8f9fe] text-sm transition-colors">Feature Request</Link></li>
               </ul>
             </div>
             {/* Legal */}

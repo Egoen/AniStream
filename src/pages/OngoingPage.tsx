@@ -220,11 +220,9 @@ export default function OngoingPage() {
             <div>
               <h4 className="text-[#ff8c94] font-bold text-xs tracking-widest mb-4 uppercase">Support</h4>
               <ul className="space-y-3">
-                {["Contact Support", "FAQ", "Help Center"].map((label) => (
-                  <li key={label}>
-                    <span className="text-[#a9abaf] hover:text-[#f8f9fe] text-sm transition-colors cursor-pointer">{label}</span>
-                  </li>
-                ))}
+                <li><a href="mailto:lastanteiku@gmail.com" className="text-[#a9abaf] hover:text-[#f8f9fe] text-sm transition-colors">Contact Support</a></li>
+                <li><Link to="/faq" className="text-[#a9abaf] hover:text-[#f8f9fe] text-sm transition-colors">FAQ</Link></li>
+                <li><Link to="/app-status" className="text-[#a9abaf] hover:text-[#f8f9fe] text-sm transition-colors">App Status</Link></li>
               </ul>
             </div>
           </div>
