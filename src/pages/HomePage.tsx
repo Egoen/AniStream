@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useHome, useSchedule, useCompleted } from "@/hooks/useAnimeQuery";
 import { useAppStore } from "@/stores/appStore";
-import { Heart, Play, Star, Bell, ChevronRight } from "lucide-react";
-import type { Anime, ScheduleDay } from "@/types/anime";
+import { Heart, Play, Star, Bell, ChevronRight, Clock } from "lucide-react";
+import type { Anime, ScheduleDay, HistoryItem } from "@/types/anime";
 import heroBanner from "@/assets/hero-banner.jpg";
 
 const DAYS_ID: Record<string, string> = {
@@ -11,6 +11,101 @@ const DAYS_ID: Record<string, string> = {
   Kamis: "Thursday", Jumat: "Friday", Sabtu: "Saturday", Minggu: "Sunday",
 };
 const FALLBACK = "https://via.placeholder.com/300x420/111118/7c3aed?text=No+Image";
+
+// ── Continue Watching Card ────────────────────────────────────────────────────
+function ContinueWatchingCard({ item }: { item: HistoryItem }) {
+  const timeAgo = (ts: number) => {
+    const diff = Date.now() - ts;
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  };
+
+  return (
+    <Link
+      to={`/watch/${item.episodeSlug}`}
+      className="group flex-none w-40 sm:w-44"
+    >
+      {/* Poster */}
+      <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-3 transition-all duration-300 group-hover:scale-[1.04] group-hover:shadow-[0_0_24px_rgba(255,140,148,0.25)]">
+        <img
+          src={item.animePoster || FALLBACK}
+          alt={item.animeTitle}
+          className="w-full h-full object-cover"
+          loading="lazy"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).src = FALLBACK; }}
+        />
+        {/* Dark gradient overlay */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(0deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0) 55%)" }} />
+
+        {/* Rose play button — center on hover */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 group-hover:scale-110 shadow-xl shadow-[#ff8c94]/30"
+            style={{ background: "linear-gradient(135deg, #ff8c94, #ff7481)" }}>
+            <Play size={16} fill="black" className="text-black ml-0.5" />
+          </div>
+        </div>
+
+        {/* Time badge */}
+        <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1">
+          <Clock size={9} className="text-[#ff8c94]" />
+          <span className="text-[9px] font-bold text-[#ff8c94]">{timeAgo(item.watchedAt)}</span>
+        </div>
+      </div>
+
+      {/* Anime title + episode */}
+      <h4 className="font-bold text-[#f8f9fe] text-xs line-clamp-1 group-hover:text-[#ff8c94] transition-colors mb-0.5">
+        {item.animeTitle}
+      </h4>
+      <p className="text-[10px] text-[#737679] line-clamp-1">
+        {item.episodeTitle}
+      </p>
+    </Link>
+  );
+}
+
+// ── Continue Watching Rail ─────────────────────────────────────────────────────
+function ContinueWatchingRail({ items }: { items: HistoryItem[] }) {
+  return (
+    <section className="relative">
+      {/* Section header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <span className="text-[#ff8c94] font-bold tracking-widest text-[10px] mb-1 block font-headline uppercase">Continue Watching</span>
+          <h2 className="text-2xl font-black font-headline tracking-tight text-[#f8f9fe]">
+            Resume Where You Left Off
+          </h2>
+        </div>
+        <Link
+          to="/history"
+          className="text-[#ff8c94] font-bold text-xs uppercase tracking-widest hover:underline flex items-center gap-1 shrink-0"
+        >
+          History <ChevronRight size={14} />
+        </Link>
+      </div>
+
+      {/* Scroll rail with gradient fade edges */}
+      <div className="relative">
+        {/* Left fade */}
+        <div className="absolute left-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
+          style={{ background: "linear-gradient(90deg, #0b0e11, transparent)" }} />
+        {/* Right fade */}
+        <div className="absolute right-0 top-0 bottom-0 w-12 z-10 pointer-events-none"
+          style={{ background: "linear-gradient(270deg, #0b0e11, transparent)" }} />
+
+        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollSnapType: "x mandatory" }}>
+          {items.map((item) => (
+            <div key={item.episodeSlug} style={{ scrollSnapAlign: "start" }}>
+              <ContinueWatchingCard item={item} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 // ── Ongoing Card ──────────────────────────────────────────────────────────────
 function OngoingCard({ anime }: { anime: Anime }) {
@@ -202,6 +297,8 @@ export default function HomePage() {
   const { data: home, isLoading: homeLoading } = useHome();
   const { data: schedule, isLoading: schedLoading } = useSchedule();
   const { data: completedData, isLoading: completedLoading } = useCompleted(1);
+  const { history } = useAppStore();
+  const recentHistory = history.slice(0, 6);
 
   const ongoing = home?.ongoing?.slice(0, 10) ?? [];
   const completed = completedData?.data?.slice(0, 10) ?? [];
@@ -222,6 +319,11 @@ export default function HomePage() {
 
       {/* Content */}
       <main className="relative z-10 px-6 md:px-16 space-y-24 -mt-20">
+
+        {/* ── Continue Watching ───────────────────────────────────────── */}
+        {recentHistory.length > 0 && (
+          <ContinueWatchingRail items={recentHistory} />
+        )}
 
         {/* ── Ongoing Anime ───────────────────────────────────────────── */}
         <section>
